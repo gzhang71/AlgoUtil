@@ -4,7 +4,7 @@ import pandas as pd
 import time
 import logging
 import pickle
-import matplotlib.pyplot as plt
+from multiprocessing import Pool
 import requests
 import datetime
 from common import get_data_path
@@ -30,6 +30,7 @@ class RESTfulProcessor:
         '2021-07-05',
         '2021-09-06'
     ]
+    core_count = 8
 
     def __init__(self):
         self.ticker = []
@@ -125,42 +126,53 @@ class RESTfulProcessor:
 
         return df_ticker
 
+    @staticmethod
+    def get_price_single_ticker(input_data):
+        key = input_data['key']
+        ticker = input_data['ticker']
+        bdates = input_data['bdates']
+        logging.info('start loading {t}'.format(t=ticker))
+        error_counter = 0
+        result = []
+        with RESTClient(key) as client:
+            for bd in bdates:
+                try:
+                    res = client.stocks_equities_daily_open_close(symbol=ticker, date=bd)
+                    res_dict = {
+                        'ticker': ticker,
+                        'date': bd,
+                        'after_hours': res.after_hours,
+                        'high': res.high,
+                        'low': res.low,
+                        'open': res.open,
+                        'pre_market': res.pre_market,
+                        'volume': res.volume
+                    }
+                    result.append(res_dict)
+                except requests.exceptions.HTTPError as e:
+                    error_counter += 1
+                    print(e)
+                    if error_counter > 10:
+                        print('too many errors, jump to next ticker')
+                        return
+                time.sleep(0.01)
+        return result
+
     def get_price(self):
         if os.path.isfile(self.ticker_price_file_name):
             self.ticker_price = self.load_data(file_name=self.ticker_price_file_name)
         else:
             df = self.ticker_filter()
             tickers = df['ticker'].values
-            ticker_price = []
             biz_dates = pd.bdate_range('2020-06-01', '2021-10-15')
             biz_dates = [x.date().strftime('%Y-%m-%d') for x in biz_dates]
             biz_dates = [x for x in biz_dates if x not in self.holidays]
+            input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates} for t in tickers]
+            with Pool(self.core_count) as p:
+                ticker_price = p.map(self.get_price_single_ticker, input_data)
 
-            with RESTClient(self.key) as client:
-                for t in tickers:
-                    logging.info('start loading {t}'.format(t=t))
-                    for bd in biz_dates:
-                        try:
-                            res = client.stocks_equities_daily_open_close(symbol=t, date=bd)
-                            res_dict = {
-                                'ticker': t,
-                                'date': bd,
-                                'after_hours': res.after_hours,
-                                'high': res.high,
-                                'low': res.low,
-                                'open': res.open,
-                                'pre_market': res.pre_market,
-                                'volume': res.volume
-                            }
-                            ticker_price.append(res_dict)
-                        except requests.exceptions.HTTPError as e:
-                            self.ticker_price_error_counter[t] = self.ticker_price_error_counter.get(t, 0) + 1
-                            print(e)
-                            if self.ticker_price_error_counter[t] > 10:
-                                print('too many errors, jump to next ticker')
-                                break
-                        time.sleep(0.01)
-
+            ticker_price = [x for x in ticker_price if x is not None]
+            ticker_price = [x for sublist in ticker_price for x in sublist]
             self.ticker_price = pd.DataFrame(ticker_price)
             self.store_data(data=self.ticker_price, file_name=self.ticker_price_file_name)
         return
