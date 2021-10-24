@@ -21,7 +21,7 @@ class RESTfulProcessor:
         self.counter = 0
 
     def set_next_url(self, next_url):
-        print('next url is {}'.format(next_url))
+        logging.info('next url is {}'.format(next_url))
         self.next_url = next_url
 
     def get_ticker(self):
@@ -41,8 +41,11 @@ class RESTfulProcessor:
         return
 
     def store_ticker(self):
+        logging.info('Storing ticker data into pickle')
         with open(self.data_folder + 'ticker.pickle', 'wb') as f:
             pickle.dump(self.ticker, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+        logging.info('Storing is done')
 
     def load_ticker(self):
         with open(self.data_folder + 'ticker.pickle') as f:
