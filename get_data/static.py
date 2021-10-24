@@ -25,6 +25,7 @@ class RESTfulProcessor:
         self.next_url = next_url
 
     def get_ticker(self):
+        if file
         with RESTClient(self.key) as client:
             while self.counter == 0 or len(ls_ticker) == 100:
                 res = client.reference_tickers_v3(next_url=self.next_url)
@@ -56,6 +57,9 @@ class RESTfulProcessor:
     def run(self):
         self.get_ticker()
         self.store_ticker()
+
+    def get_ticker_detail(self):
+        for t in self.ticker:
 
 
 if __name__ == '__main__':
