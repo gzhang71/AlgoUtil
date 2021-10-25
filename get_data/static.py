@@ -39,14 +39,15 @@ class RESTfulProcessor:
 
         self.ticker = []
         self.next_url = None
-        self.ticker_file_name = self.data_folder + 'ticker.pkl'
+        self.ticker_file_name = self.data_folder + 'data/ticker.pkl'
 
         self.ticker_detail = None
-        self.ticker_detail_file_name = self.data_folder + 'ticker_detail.pkl'
+        self.ticker_detail_file_name = self.data_folder + 'data/ticker_detail.pkl'
 
         self.ticker_price = None
-        self.ticker_price_file_name = self.data_folder + 'ticker_price.pkl'
-        self.ticker_price_file_name_ptt = self.data_folder + 'ticker_price_{}.pkl'
+        self.ticker_price_file_name = self.data_folder + 'data/ticker_price.pkl'
+        self.ticker_price_temp_folder = self.data_folder + 'data/ticker_price_temp/'
+        self.ticker_price_temp_file_name = self.ticker_price_temp_folder + 'ticker_price_{}.pkl'
 
     def set_next_url(self, next_url):
         logging.info('next url is {}'.format(next_url))
@@ -166,6 +167,22 @@ class RESTfulProcessor:
                 time.sleep(0.01)
         return result
 
+    def price_agg(self):
+        counter = 0
+        res = []
+        for f in os.listdir(self.ticker_price_temp_folder):
+            if f.startswith('ticker_price_'):
+                full_path = self.ticker_price_temp_folder + f
+                logging.info('start {i}th pickle loading {f}'.format(i=counter, f=f))
+                with open(full_path, 'rb') as fh:
+                    df_temp = pickle.load(fh)
+                    logging.info(df_temp.shape)
+                res.append(df_temp)
+                counter += 1
+
+        df_res = pd.concat(res)
+        self.store_data(data=df_res, file_name=self.ticker_price_file_name)
+
     def get_price(self):
         if os.path.isfile(self.ticker_price_file_name):
             self.ticker_price = self.load_data(file_name=self.ticker_price_file_name)
@@ -177,8 +194,7 @@ class RESTfulProcessor:
             biz_dates = [x.date().strftime('%Y-%m-%d') for x in biz_dates]
             biz_dates = [x for x in biz_dates if x not in self.holidays]
             input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates, 'verbose': self.verbose} for t in tickers]
-            ticker_price = []
-            for i in range(1100, ticker_count, 100):
+            for i in range(0, ticker_count, 100):  # chunk up to prevent memory issue
                 logging.info('start {i} / {t} loop'.format(i=i, t=ticker_count))
                 start_idx = i
                 end_idx = min(i + 100, ticker_count)
@@ -192,12 +208,9 @@ class RESTfulProcessor:
                 df_ticker_price_tmp = pd.DataFrame(ticker_price)
                 self.store_data(
                     data=df_ticker_price_tmp,
-                    file_name=self.ticker_price_file_name_ptt.format(random.randint(a=100000, b=1000000))
+                    file_name=self.ticker_price_temp_file_name.format(random.randint(a=100000, b=1000000))
                 )
 
-                ticker_price.append(df_ticker_price_tmp)
-            self.ticker_price = pd.concat(ticker_price)
-            self.store_data(data=self.ticker_price, file_name=self.ticker_price_file_name)
         return
 
     def run(self):
