@@ -7,6 +7,7 @@ import pickle
 from multiprocessing import Pool
 import requests
 import datetime
+import json
 import random
 from common import get_data_path
 
@@ -154,7 +155,7 @@ class RESTfulProcessor:
                         'volume': res.volume
                     }
                     result.append(res_dict)
-                except requests.exceptions.HTTPError as e:
+                except (requests.exceptions.HTTPError, json.decoder.JSONDecodeError) as e:
                     error_counter += 1
                     if verbose:
                         print(e)
@@ -177,7 +178,7 @@ class RESTfulProcessor:
             biz_dates = [x for x in biz_dates if x not in self.holidays]
             input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates, 'verbose': self.verbose} for t in tickers]
             ticker_price = []
-            for i in range(0, ticker_count, 100):
+            for i in range(1100, ticker_count, 100):
                 logging.info('start {i} / {t} loop'.format(i=i, t=ticker_count))
                 start_idx = i
                 end_idx = min(i + 100, ticker_count)
