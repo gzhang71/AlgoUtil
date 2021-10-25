@@ -18,7 +18,12 @@ pd.options.display.width = 0
 
 class RESTfulProcessor:
     key = os.environ['polygon_key']
-    data_folder = get_data_path()
+    data_folder = get_data_path() + 'data/'
+
+    # Todo: Hardcode the start/end date isn't the best practise. To provide more flexibility on date range, we need a holiday calendar api.
+    start_date = '2021-06-01'
+    train_test_cutoff = '2021-08-01'
+    end_date = '2021-10-15'
     holidays = [
         '2020-07-03',
         '2020-09-07',
@@ -39,14 +44,14 @@ class RESTfulProcessor:
 
         self.ticker = []
         self.next_url = None
-        self.ticker_file_name = self.data_folder + 'data/ticker.pkl'
+        self.ticker_file_name = self.data_folder + 'ticker.pkl'
 
         self.ticker_detail = None
-        self.ticker_detail_file_name = self.data_folder + 'data/ticker_detail.pkl'
+        self.ticker_detail_file_name = self.data_folder + 'ticker_detail.pkl'
 
         self.ticker_price = None
-        self.ticker_price_file_name = self.data_folder + 'data/ticker_price.pkl'
-        self.ticker_price_temp_folder = self.data_folder + 'data/ticker_price_temp/'
+        self.ticker_price_file_name = self.data_folder + 'ticker_price.pkl'
+        self.ticker_price_temp_folder = self.data_folder + 'ticker_price_temp/'
         self.ticker_price_temp_file_name = self.ticker_price_temp_folder + 'ticker_price_{}.pkl'
 
     def set_next_url(self, next_url):
@@ -127,7 +132,6 @@ class RESTfulProcessor:
             'currency_name', 'cik', 'outstanding_shares', 'market_cap', 'address', 'sic_code', 'sic_description',
             'ticker_suffix', 'base_currency_symbol'
         ]]
-        # df_ticker = df_ticker[df_ticker['market_cap'] > 1e9]
 
         return df_ticker
 
@@ -190,7 +194,7 @@ class RESTfulProcessor:
             df = self.ticker_filter()
             tickers = df['ticker'].values
             ticker_count = len(tickers)
-            biz_dates = pd.bdate_range('2020-06-01', '2021-10-15')
+            biz_dates = pd.bdate_range(self.start_date, self.end_date)
             biz_dates = [x.date().strftime('%Y-%m-%d') for x in biz_dates]
             biz_dates = [x for x in biz_dates if x not in self.holidays]
             input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates, 'verbose': self.verbose} for t in tickers]
@@ -213,14 +217,24 @@ class RESTfulProcessor:
 
         return
 
-    def run(self):
+    def process_data(self):
         self.get_ticker()
         self.get_ticker_detail()
         self.get_price()
 
-        return
+        df_price = self.ticker_price.copy()
+        df_ticker = self.ticker_detail.copy()
+
+        df_all = pd.merge(df_price, df_ticker, on='ticker')
+        df_all.drop_duplicates(subset=['ticker', 'date'], inplace=True)
+        df_all['date'] = pd.to_datetime(df_all['date'], infer_datetime_format=True).dt.date
+        cutoff = datetime.datetime.strptime(self.train_test_cutoff, '%Y-%m-%d').date()
+        df_all_train = df_all[df_all['date'] < cutoff].copy()
+        df_all_test = df_all[df_all['date'] >= cutoff].copy()
+
+        return df_all_train, df_all_test
 
 
 if __name__ == '__main__':
     resp = RESTfulProcessor(verbose=False)
-    resp.run()
+    df_train, df_test = resp.process_data()
