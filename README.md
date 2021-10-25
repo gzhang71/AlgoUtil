@@ -2,10 +2,37 @@
 
 This is a demo repo to show how to process data, construct a scalarable machine learning class and do tests on it. The goal of this model is to extract model to extract a few factors from existing data, which will be used to compare the relative performance of stocks. Additionally, we can predict the distribution of trade price. 
 
-Data is downloaded from [https://polygon.io/][PlDb] free tier subcription. The data includes: 
-- Reference Data. 
-- Trade Data. 
-- Snapshot Data. 
+Raw data is publically avaiable from *[Polygon.io](https://polygon.io/)* free tier subcription. The data includes: 
+- Reference Data. Stored in ticker_detail.pkl. It has the following columns: 
+    - ticker
+    - name (company name)
+    - primiary_exchange
+    - type (Industry type)
+    - cik code (The Central Index Key (CIK) is used on the SEC's computer systems to identify corporations and individual people who have filed disclosure with the SEC.)
+    - composite_figi (The Financial Instrument Global Identifier (FIGI) (formerly Bloomberg Global Identifier (BBGID)) is an open standard, unique identifier of financial instruments that can be assigned to instruments including common stock, options, derivatives, futures, corporate and government bonds, municipals, currencies, and mortgage products)
+    - share_class_figi
+    - outstanding_shares
+    - market_cap
+    - address
+    - sic_code (Standard Industrial Classification (SIC) codes are four-digit numerical codes that categorize the industries that companies belong to based on their business activities. Standard Industrial Classification codes were mostly replaced by the six-digit North American Industry Classification System (NAICS).)
+    - sic_description
+    - ticker_root
+    - ticker_suffix
+    - base_currency_symbol
+    
+- Trade Data. Stored in ticker_price.pkl. It has the following columns: 
+    - ticker
+    - date
+    - after_hours
+    - high
+    - low
+    - open
+    - close
+    - pre_market
+    - volume
+- Snapshot Data. Stored in snapshot.pkl
+
+Data will also be found via *[Google Drive](https://drive.google.com/drive/folders/1MbLXsBuGxRpc2FpT7w4tRRhMNtzDj3RH?usp=sharing)*
 
 Functions are provided to query data via WebSocket and RESTful API
 

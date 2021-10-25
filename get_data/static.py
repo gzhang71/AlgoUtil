@@ -40,9 +40,8 @@ class RESTfulProcessor:
         self.ticker_detail = []
         self.ticker_detail_file_name = self.data_folder + 'ticker_detail.pkl'
 
-        self.ticker_price = []
+        self.ticker_price = None
         self.ticker_price_file_name = self.data_folder + 'ticker_price.pkl'
-        self.ticker_price_error_counter = {}
 
     def set_next_url(self, next_url):
         logging.info('next url is {}'.format(next_url))
@@ -171,6 +170,7 @@ class RESTfulProcessor:
             with Pool(self.core_count) as p:
                 ticker_price = p.map(self.get_price_single_ticker, input_data)
 
+            # self.store_data(data=ticker_price, file_name=self.data_folder + 'temp.pkl')
             ticker_price = [x for x in ticker_price if x is not None]
             ticker_price = [x for sublist in ticker_price for x in sublist]
             self.ticker_price = pd.DataFrame(ticker_price)
