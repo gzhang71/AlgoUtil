@@ -7,6 +7,7 @@ import pickle
 from multiprocessing import Pool
 import requests
 import datetime
+import random
 from common import get_data_path
 
 logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s')
@@ -30,18 +31,21 @@ class RESTfulProcessor:
         '2021-07-05',
         '2021-09-06'
     ]
-    core_count = 8
+    core_count = 16
 
-    def __init__(self):
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+
         self.ticker = []
         self.next_url = None
         self.ticker_file_name = self.data_folder + 'ticker.pkl'
 
-        self.ticker_detail = []
+        self.ticker_detail = None
         self.ticker_detail_file_name = self.data_folder + 'ticker_detail.pkl'
 
         self.ticker_price = None
         self.ticker_price_file_name = self.data_folder + 'ticker_price.pkl'
+        self.ticker_price_file_name_ptt = self.data_folder + 'ticker_price_{}.pkl'
 
     def set_next_url(self, next_url):
         logging.info('next url is {}'.format(next_url))
@@ -130,7 +134,9 @@ class RESTfulProcessor:
         key = input_data['key']
         ticker = input_data['ticker']
         bdates = input_data['bdates']
-        logging.info('start loading {t}'.format(t=ticker))
+        verbose = input_data['verbose']
+        if verbose:
+            logging.info('start loading {t}'.format(t=ticker))
         error_counter = 0
         result = []
         with RESTClient(key) as client:
@@ -150,9 +156,11 @@ class RESTfulProcessor:
                     result.append(res_dict)
                 except requests.exceptions.HTTPError as e:
                     error_counter += 1
-                    print(e)
+                    if verbose:
+                        print(e)
                     if error_counter > 10:
-                        print('too many errors, jump to next ticker')
+                        if verbose:
+                            print('too many errors, jump to next ticker')
                         return
                 time.sleep(0.01)
         return result
@@ -163,17 +171,31 @@ class RESTfulProcessor:
         else:
             df = self.ticker_filter()
             tickers = df['ticker'].values
+            ticker_count = len(tickers)
             biz_dates = pd.bdate_range('2020-06-01', '2021-10-15')
             biz_dates = [x.date().strftime('%Y-%m-%d') for x in biz_dates]
             biz_dates = [x for x in biz_dates if x not in self.holidays]
-            input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates} for t in tickers]
-            with Pool(self.core_count) as p:
-                ticker_price = p.map(self.get_price_single_ticker, input_data)
+            input_data = [{'key': self.key, 'ticker': t, 'bdates': biz_dates, 'verbose': self.verbose} for t in tickers]
+            ticker_price = []
+            for i in range(0, ticker_count, 100):
+                logging.info('start {i} / {t} loop'.format(i=i, t=ticker_count))
+                start_idx = i
+                end_idx = min(i + 100, ticker_count)
+                input_temp = input_data[start_idx: end_idx]
 
-            # self.store_data(data=ticker_price, file_name=self.data_folder + 'temp.pkl')
-            ticker_price = [x for x in ticker_price if x is not None]
-            ticker_price = [x for sublist in ticker_price for x in sublist]
-            self.ticker_price = pd.DataFrame(ticker_price)
+                with Pool(self.core_count) as p:
+                    ticker_price = p.map(self.get_price_single_ticker, input_temp)
+
+                ticker_price = [x for x in ticker_price if x is not None]
+                ticker_price = [x for sublist in ticker_price for x in sublist]
+                df_ticker_price_tmp = pd.DataFrame(ticker_price)
+                self.store_data(
+                    data=df_ticker_price_tmp,
+                    file_name=self.ticker_price_file_name_ptt.format(random.randint(a=100000, b=1000000))
+                )
+
+                ticker_price.append(df_ticker_price_tmp)
+            self.ticker_price = pd.concat(ticker_price)
             self.store_data(data=self.ticker_price, file_name=self.ticker_price_file_name)
         return
 
@@ -186,5 +208,5 @@ class RESTfulProcessor:
 
 
 if __name__ == '__main__':
-    resp = RESTfulProcessor()
-    df = resp.run()
+    resp = RESTfulProcessor(verbose=False)
+    resp.run()
