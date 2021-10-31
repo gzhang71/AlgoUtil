@@ -156,6 +156,7 @@ class RESTfulProcessor:
                         'high': res.high,
                         'low': res.low,
                         'open': res.open,
+                        'close': res.close,
                         'pre_market': res.pre_market,
                         'volume': res.volume
                     }
