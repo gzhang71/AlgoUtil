@@ -222,6 +222,7 @@ class RESTfulProcessor:
         self.get_ticker()
         self.get_ticker_detail()
         self.get_price()
+        self.price_agg()
 
         df_price = self.ticker_price.copy()
         df_ticker = self.ticker_detail.copy()
