@@ -216,13 +216,14 @@ class RESTfulProcessor:
                     file_name=self.ticker_price_temp_file_name.format(random.randint(a=100000, b=1000000))
                 )
 
+            self.price_agg()
         return
 
     def process_data(self):
         self.get_ticker()
         self.get_ticker_detail()
         self.get_price()
-        self.price_agg()
+
 
         df_price = self.ticker_price.copy()
         df_ticker = self.ticker_detail.copy()
