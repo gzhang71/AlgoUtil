@@ -230,6 +230,18 @@ class RESTfulProcessor:
         df_all.drop_duplicates(subset=['ticker', 'date'], inplace=True)
         df_all['date'] = pd.to_datetime(df_all['date'], infer_datetime_format=True).dt.date
         cutoff = datetime.datetime.strptime(self.train_test_cutoff, '%Y-%m-%d').date()
+
+        prev_columns = ['after_hours', 'pre_market', 'volume', 'open']  # add close
+        df_all.sort_values(by=['ticker', 'date'], inplace=True)
+        last_prefix = 'last_'
+        chg_suffix = '_chg'
+        pct_chg_suffix = '_pct_chg'
+
+        for c in prev_columns:
+            df_all[last_prefix + c] = df_all.groupby(['ticker'])[c].shift(1)
+            df_all[c + chg_suffix] = df_all[c] - df_all[last_prefix + c]
+            df_all[c + pct_chg_suffix] = (df_all[c] / df_all[last_prefix + c] - 1) * 100
+
         df_all_train = df_all[df_all['date'] < cutoff].copy()
         df_all_test = df_all[df_all['date'] >= cutoff].copy()
 
