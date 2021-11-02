@@ -233,7 +233,7 @@ class RESTfulProcessor:
         df_all['date'] = pd.to_datetime(df_all['date'], infer_datetime_format=True).dt.date
         cutoff = datetime.datetime.strptime(self.train_test_cutoff, '%Y-%m-%d').date()
 
-        prev_columns = ['after_hours', 'pre_market', 'volume', 'open']  # add close
+        prev_columns = ['after_hours', 'pre_market', 'volume', 'open', 'close']
         df_all.sort_values(by=['ticker', 'date'], inplace=True)
         last_prefix = 'last_'
         chg_suffix = '_chg'
