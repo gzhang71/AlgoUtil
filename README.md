@@ -42,10 +42,11 @@ Currently, the following topics in data exploration are demonstrated:
 - Animation to see market movement over time
 
 The following machine learning models/algos are demonstrated. Additionally, a study note is attached to describe the key factors of this model.  
-- PCA/PCR
+- Linear Regression
+- Logistic Regression
+- Regularization Lasso, Ridge and ElasticNet
 - ARMA
-- Lasso and Ridge
-- ElasticNet
+- PCA/PCR
 - Decision Tree
 - Random Forest and ExtraTree
 - SVM

@@ -1,13 +1,5 @@
-import os
-import sys
-import seaborn as sns
-import matplotlib.pyplot as plt
-from matplotlib import animation
-import datetime
-import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-from sklearn.preprocessing import OneHotEncoder
+import numpy as np
 
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_columns', 200)
@@ -28,44 +20,33 @@ df_ohe = pd.get_dummies(df_train_reg['ticker'], drop_first=True)
 df_train_reg = df_train_reg.join(df_ohe)
 df_train_reg.drop(columns='ticker', inplace=True)
 
-x_cols = ['last_close', 'pre_market', 'AMZN', 'MSFT']
+# statsmodels.api regression
+import statsmodels.api as sm
+
+x_cols = ['last_close', 'pre_market', 'AMZN', 'MSFT', 'volume']
 Y = df_train_reg['close']
 X = sm.add_constant(df_train_reg[x_cols])
 
 model = sm.OLS(endog=Y, exog=X, missing='drop')
-result1 = model.fit()
-df_train_reg['predict'] = result1.predict(X)
-df_train_reg['r'] = result1.resid
-result1.summary2()
+result = model.fit()
+df_train_reg['predict'] = result.predict(X)
+df_train_reg['r'] = result.resid
+print(result.summary2())  # vs result.summary()
 
 # remove intercept
 import statsmodels.formula.api as smf
-results = smf.ols('close ~ last_close + pre_market + np.log(volume)', data=df_train_reg).fit()
-results.summary()
 
+result2 = smf.ols('close ~ last_close + pre_market + np.log(volume)', data=df_train_reg).fit()
+print(result2.summary())
+print(result2.summary2())
+
+# Out of Sample Prediction
 df_test_reg = df_test.loc[
     df_test['ticker'].isin(sample_tickers),
     ['last_close', 'pre_market', 'volume', 'close', 'ticker']
 ]
-
 df_test_reg = df_test_reg.join(pd.get_dummies(df_test_reg['ticker'], drop_first=True))
 df_test_reg.drop(columns='ticker', inplace=True)
 X_new = sm.add_constant(df_test_reg[x_cols])
-result1.predict(X_new)
-
-# sklearn approach
-# logistic regression
-from sklearn.linear_model import LogisticRegression, LinearRegression
-df_train_reg2 = df_train_reg.dropna().copy()
-
-linear_model = LinearRegression().fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
-logistic_model = LogisticRegression(random_state=0, penalty='l2').fit(X=df_train_reg2[x_cols], y=df_train_reg2['GOOG'])
-
-# Regularization
-from sklearn.linear_model import Lasso, Ridge
-
-lasso = Lasso(alpha=1).fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
-lasso.score(X=df_test_reg[x_cols], y=df_test_reg['close'])
-
-ridge = Ridge(alpha=1).fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
-ridge.score(X=df_test_reg[x_cols], y=df_test_reg['close'])
+df_test_reg['predict'] = result2.predict(X_new)
+df_test_reg['r'] = df_test_reg['close'] - df_test_reg['predict']
