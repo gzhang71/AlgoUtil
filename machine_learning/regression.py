@@ -50,3 +50,9 @@ df_test_reg.drop(columns='ticker', inplace=True)
 X_new = sm.add_constant(df_test_reg[x_cols])
 df_test_reg['predict'] = result2.predict(X_new)
 df_test_reg['r'] = df_test_reg['close'] - df_test_reg['predict']
+
+# sklearn approach
+from sklearn.linear_model import LinearRegression
+df_train_reg2 = df_train_reg.dropna().copy()
+linear_model = LinearRegression().fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
+linear_model.score(X=df_train_reg2[x_cols], y=df_train_reg2['GOOG'])

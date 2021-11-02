@@ -42,10 +42,10 @@ Currently, the following topics in data exploration are demonstrated:
 - Animation to see market movement over time
 
 The following machine learning models/algos are demonstrated. Additionally, a study note is attached to describe the key factors of this model.  
-- Linear Regression
-- Logistic Regression
-- Regularization Lasso, Ridge and ElasticNet
-- ARMA
+- Linear Regression. Intercept vs non-intercept regression
+- Logistic Regression. Draw AUC/ROC curve, precision-recall curve, and show some associated metrics 
+- Regularization. Lasso, Ridge and ElasticNet
+- ARMA & ARIMA
 - PCA/PCR
 - Decision Tree
 - Random Forest and ExtraTree
