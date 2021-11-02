@@ -13,7 +13,6 @@ pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_columns', 200)
 pd.set_option('display.width', 1000)
 
-from common import get_data_path
 from get_data.static import RESTfulProcessor
 
 resp = RESTfulProcessor(verbose=False)
@@ -54,9 +53,6 @@ df_test_reg.drop(columns='ticker', inplace=True)
 X_new = sm.add_constant(df_test_reg[x_cols])
 result1.predict(X_new)
 
-# Regularization
-
-
 # sklearn approach
 # logistic regression
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -65,4 +61,11 @@ df_train_reg2 = df_train_reg.dropna().copy()
 linear_model = LinearRegression().fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
 logistic_model = LogisticRegression(random_state=0, penalty='l2').fit(X=df_train_reg2[x_cols], y=df_train_reg2['GOOG'])
 
+# Regularization
+from sklearn.linear_model import Lasso, Ridge
 
+lasso = Lasso(alpha=1).fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
+lasso.score(X=df_test_reg[x_cols], y=df_test_reg['close'])
+
+ridge = Ridge(alpha=1).fit(X=df_train_reg2[x_cols], y=df_train_reg2['close'])
+ridge.score(X=df_test_reg[x_cols], y=df_test_reg['close'])
