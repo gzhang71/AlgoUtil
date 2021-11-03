@@ -44,9 +44,9 @@ Currently, the following topics in data exploration are demonstrated:
 The following machine learning models/algos are demonstrated. Additionally, a study note is attached to describe the key factors of this model.  
 - Linear Regression. Intercept vs non-intercept regression
 - Logistic Regression. Draw AUC/ROC curve, precision-recall curve, and show some associated metrics 
-- Regularization. Lasso, Ridge and ElasticNet
-- ARMA & ARIMA. Demonstrated unit test, ACF/PACF.  
-- PCA/PCR
+- Regularization. Lasso, Ridge and ElasticNet. Made a plot to visualize the difference between different regularization approaches
+- ARMA & ARIMA. Demonstrated unit test, ACF/PACF, and the residual diagnostic plot
+- PCA/PCR. 
 - Decision Tree
 - Random Forest and ExtraTree
 - SVM
