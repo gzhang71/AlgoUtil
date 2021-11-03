@@ -45,7 +45,7 @@ The following machine learning models/algos are demonstrated. Additionally, a st
 - Linear Regression. Intercept vs non-intercept regression
 - Logistic Regression. Draw AUC/ROC curve, precision-recall curve, and show some associated metrics 
 - Regularization. Lasso, Ridge and ElasticNet
-- ARMA & ARIMA
+- ARMA & ARIMA. Demonstrated unit test, ACF/PACF.  
 - PCA/PCR
 - Decision Tree
 - Random Forest and ExtraTree
