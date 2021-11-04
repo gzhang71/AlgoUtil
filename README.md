@@ -46,7 +46,7 @@ The following machine learning models/algos are demonstrated. Additionally, a st
 - Logistic Regression. Draw AUC/ROC curve, precision-recall curve, and show some associated metrics 
 - Regularization. Lasso, Ridge and ElasticNet. Made a plot to visualize the difference between different regularization approaches
 - ARMA & ARIMA. Demonstrated unit test, ACF/PACF, and the residual diagnostic plot
-- PCA/PCR. 
+- PCA. Showed the ways to read loadings, component variance and variance ratio; made a few plots leveraging plotly 
 - SVM. 
 - Decision Tree
 - Random Forest and ExtraTree
