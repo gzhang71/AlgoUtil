@@ -47,16 +47,14 @@ The following machine learning models/algos are demonstrated. Additionally, a st
 - Regularization. Lasso, Ridge and ElasticNet. Made a plot to visualize the difference between different regularization approaches
 - ARMA & ARIMA. Demonstrated unit test, ACF/PACF, and the residual diagnostic plot
 - PCA/PCR. 
+- SVM. 
 - Decision Tree
 - Random Forest and ExtraTree
-- SVM
 - XGBoost
 - LightGBM
+- sklearn
 - Neural Network Using TensorFlow
 - Neural Network Using PyTorch
 
 A few additional questions are discussed: 
 - Output the importance of each factor
-- Show directional impact of one factor
-- Show MAD, MSE, R^2 for price prediction
-- Show Entropy, AUC/ROC curve
