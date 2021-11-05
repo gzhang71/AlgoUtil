@@ -48,7 +48,7 @@ The following machine learning models/algos are demonstrated. Additionally, a st
 - ARMA & ARIMA. Demonstrated unit test, ACF/PACF, and the residual diagnostic plot
 - PCA. Showed the ways to read loadings, component variance and variance ratio; made a few plots leveraging plotly 
 - SVM. 
-- Decision Tree, Random Forest and ExtraTree
+- Decision Tree, Random Forest and ExtraTree. Provided an example for the three tree models. Described feature importance using permutation importance and SHAP value. Showed an example for summary plot, force plot, decision plot and waterfall plot.
 - XGBoost
 - LightGBM
 - sklearn
